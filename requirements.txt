@@ -1,0 +1,3 @@
+streamlit --upgrade
+scipy==1.1.0
+opencv-contrib-python-headless
