@@ -193,3 +193,7 @@ if clicked:
 
 
 #output_image = "images/output-images/"+ style_name+ "-" + img
+
+######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
+#https://download.pytorch.org/whl/cpu/torch-1.7.1%2Bcpu-cp37-cp37m-linux_x86_64.whl
+#https://download.pytorch.org/whl/cpu/torchvision-0.8.2%2Bcpu-cp37-cp37m-linux_x86_64.whl

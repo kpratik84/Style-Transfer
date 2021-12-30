@@ -7,7 +7,7 @@ import numpy as np
 
 class StyleTransfer(object):
     """The central object that performs style transfer when called.
-    
+
     :param lr: Learning rate of the optimizer.
     :type lr: float
     :param content_weight: Weight for content loss.
@@ -20,32 +20,32 @@ class StyleTransfer(object):
     :type style_weights: str
     :param avg_pool: If ``True``, replaces max-pooling by average-pooling.
     :type avg_pool: bool
-    :param feature_norm: If ``True``, divides each ``style_weight`` by the 
+    :param feature_norm: If ``True``, divides each ``style_weight`` by the
         square of the number of feature maps in the corresponding layer.
     :type feature_norm: bool
-    :param weights: Weights of the VGG19 Network. Either ``'original'`` 
-        weights or ``'normalized'`` weights that are scaled such that the 
+    :param weights: Weights of the VGG19 Network. Either ``'original'``
+        weights or ``'normalized'`` weights that are scaled such that the
         mean activation of each convolutional filter over images
         and positions is equal to one.
     :type weights: str
-    :param preserve_color: If set to ``'style'``, changes color of content 
-        image to color of style image. If set to ``'content'``, changes 
-        color of style image to color of content image. If set to 
+    :param preserve_color: If set to ``'style'``, changes color of content
+        image to color of style image. If set to ``'content'``, changes
+        color of style image to color of content image. If set to
         ``None``, does not change any color.
     :type preserve_color: Union[str, None]
-    :param device: Set to ``'cpu'`` to use CPU, ``'cuda'`` to use GPU  or 
+    :param device: Set to ``'cpu'`` to use CPU, ``'cuda'`` to use GPU  or
         ``'auto'`` to automatically choose device.
     :type device: str
-    :param use_amp: If ``True``, uses automatic mixed precision for 
+    :param use_amp: If ``True``, uses automatic mixed precision for
         training.
     :type use_amp: bool
     :param adam: If ``True``, uses Adam instead of LBFGS optimizer.
     :type adam: bool
-    :param optim_cpu: If ``True``, optimizes artwork on CPU, but can 
-        calculate gradients on GPU. This moves some data from GPU memory 
+    :param optim_cpu: If ``True``, optimizes artwork on CPU, but can
+        calculate gradients on GPU. This moves some data from GPU memory
         to working memory, but increases training time.
     :type optim_cpu: bool
-    :param logging: Number of iterations between logs. If set to ``0``, does 
+    :param logging: Number of iterations between logs. If set to ``0``, does
         not log.
     :type logging: int
     """
@@ -54,9 +54,9 @@ class StyleTransfer(object):
                  content_weights="{'relu_4_2':1}", style_weights=("{'relu_1_1':"
                  "1,'relu_2_1':1,'relu_3_1':1,'relu_4_1':1,'relu_5_1':1}"),
                  avg_pool=False, feature_norm=True, weights='original',
-                 preserve_color='style', device='auto', use_amp=False, 
+                 preserve_color='style', device='auto', use_amp=False,
                  adam=False, optim_cpu=False, logging=50):
-              
+
         if device == 'auto':
             self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         else:
@@ -80,26 +80,26 @@ class StyleTransfer(object):
         :type content: PIL.Image.Image
         :param style: Style image.
         :type style: PIL.Image.Image
-        :param area: ``content`` and ``style`` are scaled such that their area 
-            is ``area`` * ``area``. ``artwork`` has the same shape as 
+        :param area: ``content`` and ``style`` are scaled such that their area
+            is ``area`` * ``area``. ``artwork`` has the same shape as
             ``content``.
         :type area: int
-        :param init_random: If ``True``, initializes ``artwork`` with random 
+        :param init_random: If ``True``, initializes ``artwork`` with random
             image.
         :type init_random: bool
-        :param init_img: Image with which ``artwork`` is initialized. If set 
-            to ``None``, initializes ``artwork`` either with ``content`` or 
+        :param init_img: Image with which ``artwork`` is initialized. If set
+            to ``None``, initializes ``artwork`` either with ``content`` or
             randomly.
         :type init_img: Union[PIL.Image.Image, None]
         :param iter: Number of iterations.
         :type iter: int
-        :return: ``artwork`` that matches content of ``content`` and style of 
+        :return: ``artwork`` that matches content of ``content`` and style of
             ``style``.
         :rtype: PIL.Image.Image
         """
 
         assert not (init_random and init_img)
-        artwork, optimizer, scaler = self._init_call(content, style, area, 
+        artwork, optimizer, scaler = self._init_call(content, style, area,
                                                      init_random, init_img)
         i = 0
         if self.logging:
@@ -113,20 +113,20 @@ class StyleTransfer(object):
                     total_loss = losses[0] if self.adam else self.lr*losses[0]
                 scaler.scale(total_loss).backward()
                 scaler.unscale(optimizer)
-                
+
                 nonlocal i
 
                 if i in [0,10, 20, 30, 40, 50, 60 , 70 , 80, 90, 100, 150,300,500]:
                   artwork_int = self.postprocess(artwork)
-                  artwork_int.save("/content/gdrive/MyDrive/Prism/prism/images/Interim_images/"  + str(i) +".jpg")
-                  artwork_arr.append("/content/gdrive/MyDrive/Prism/prism/images/Interim_images/" + str(i) +".jpg")
+                  artwork_int.save("images/Interim_images/"  + str(i) +".jpg")
+                  artwork_arr.append("images/Interim_images/" + str(i) +".jpg")
                 i += 1
                 if self.logging and (i % self.logging == 0):
                     logger(i, losses, artwork, scaler)
                 return total_loss
 
             optimizer.step(closure)
-            
+
         if self.logging:
             logger.close()
         self.criterion.reset()
@@ -145,7 +145,7 @@ class StyleTransfer(object):
             artwork = artwork.cpu()
         artwork.requires_grad_()
         if self.adam:
-            optimizer = torch.optim.Adam([artwork], lr=self.lr)    
+            optimizer = torch.optim.Adam([artwork], lr=self.lr)
         else:
             optimizer = torch.optim.LBFGS([artwork])
         scaler = GradScaler(2.**16, 2.0, 0.5, 50, self.use_amp)
