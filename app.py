@@ -140,7 +140,6 @@ clicked = st.button("Stylize")
 style_transfer = StyleTransfer(style_weight = 1000, content_weight = 1)
 
 if clicked:
-
   trans_images = [image_ms]
   for i in [0,10, 20, 30, 40, 50, 60 , 70 , 80, 90, 100, 150,300,500, 500, 500]:
     #artwork_int = self.postprocess(artwork)
